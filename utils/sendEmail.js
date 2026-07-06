@@ -14,11 +14,11 @@ async function sendOrderConfirmationEmail(toEmail, order) {
     .map(
       (item) => `
       <tr>
-        <td style="padding:8px 0;border-bottom:1px solid #E7DDD4;">
+        <td style="padding:8px 0;border-bottom:1px solid #D8E0D9;">
           <strong>${item.name}</strong><br/>
-          <span style="color:#8A7F76;font-size:13px;">Qty: ${item.qty}</span>
+          <span style="color:#6B7B76;font-size:13px;">Qty: ${item.qty}</span>
         </td>
-        <td style="padding:8px 0;border-bottom:1px solid #E7DDD4;text-align:right;">
+        <td style="padding:8px 0;border-bottom:1px solid #D8E0D9;text-align:right;">
           Rs ${item.price * item.qty}
         </td>
       </tr>`
@@ -26,12 +26,12 @@ async function sendOrderConfirmationEmail(toEmail, order) {
     .join("");
 
   const html = `
-    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#2B2420;">
-      <h2 style="color:#8C4A3A;">Handmade Boutique</h2>
+    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#1A2E2A;">
+      <h2 style="color:#4A6B5A;">ReLoved</h2>
       <p>Hi ${order.shippingAddress?.name || "there"},</p>
       <p>Thanks for your order! We've received your payment and your order is now confirmed.</p>
 
-      <div style="background:#FAF3EC;padding:16px;border-radius:8px;margin:20px 0;">
+      <div style="background:#E8EDE6;padding:16px;border-radius:8px;margin:20px 0;">
         <p style="margin:0;"><strong>Order Number:</strong> ${order.orderNumber}</p>
         <p style="margin:4px 0 0;"><strong>Delivery:</strong> ${
           order.deliveryOption === "standard" ? "Standard Delivery" : "Local Pickup"
@@ -49,21 +49,21 @@ async function sendOrderConfirmationEmail(toEmail, order) {
         }</td></tr>
         <tr>
           <td style="font-weight:bold;padding-top:8px;">Total</td>
-          <td style="text-align:right;font-weight:bold;color:#8C4A3A;padding-top:8px;">Rs ${order.total}</td>
+          <td style="text-align:right;font-weight:bold;color:#4A6B5A;padding-top:8px;">Rs ${order.total}</td>
         </tr>
       </table>
 
-      <p style="margin-top:24px;font-size:13px;color:#8A7F76;">
+      <p style="margin-top:24px;font-size:13px;color:#6B7B76;">
         Shipping to: ${order.shippingAddress?.address || "—"}<br/>
         ${order.shippingAddress?.phone || ""}
       </p>
 
-      <p style="margin-top:24px;">We'll let you know when your order ships. Thanks for shopping handmade!</p>
+      <p style="margin-top:24px;">We'll let you know when your order ships. Thanks for giving these pieces a new home!</p>
     </div>
   `;
 
   await transporter.sendMail({
-    from: `"Handmade Boutique" <${process.env.EMAIL_USER}>`,
+    from: `"ReLoved" <${process.env.EMAIL_USER}>`,
     to: toEmail,
     subject: `Order Confirmed — ${order.orderNumber}`,
     html,
@@ -81,24 +81,24 @@ async function sendOrderStatusEmail(toEmail, order) {
   };
 
   const html = `
-    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#2B2420;">
-      <h2 style="color:#8C4A3A;">Handmade Boutique</h2>
+    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#1A2E2A;">
+      <h2 style="color:#4A6B5A;">ReLoved</h2>
       <p>Hi there,</p>
       <p>Your order status has been updated.</p>
-      <div style="background:#FAF3EC;padding:16px;border-radius:8px;margin:20px 0;">
+      <div style="background:#E8EDE6;padding:16px;border-radius:8px;margin:20px 0;">
         <p style="margin:0;"><strong>Order Number:</strong> ${order.orderNumber}</p>
         <p style="margin:8px 0 0;"><strong>New Status:</strong>
-          <span style="color:#8C4A3A;font-weight:bold;">
+          <span style="color:#4A6B5A;font-weight:bold;">
             ${statusLabels[order.orderStatus] || order.orderStatus}
           </span>
         </p>
       </div>
-      <p>Thanks for shopping handmade!</p>
+      <p>Thanks for giving these pieces a new home!</p>
     </div>
   `;
 
   await transporter.sendMail({
-    from: `"Handmade Boutique" <${process.env.EMAIL_USER}>`,
+    from: `"ReLoved" <${process.env.EMAIL_USER}>`,
     to: toEmail,
     subject: `Order ${order.orderNumber} — Status Updated`,
     html,
@@ -107,12 +107,12 @@ async function sendOrderStatusEmail(toEmail, order) {
 
 async function sendProductApprovedEmail(toEmail, product) {
   const html = `
-    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#2B2420;">
-      <h2 style="color:#8C4A3A;">Handmade Boutique</h2>
+    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#1A2E2A;">
+      <h2 style="color:#4A6B5A;">ReLoved</h2>
       <p>Good news!</p>
-      <p>Your product <strong>${product.name}</strong> has been approved and is now live on the shop.</p>
-      <div style="background:#FAF3EC;padding:16px;border-radius:8px;margin:20px 0;">
-        <p style="margin:0;"><strong>Product:</strong> ${product.name}</p>
+      <p>Your listing <strong>${product.name}</strong> has been approved and is now live on the shop.</p>
+      <div style="background:#E8EDE6;padding:16px;border-radius:8px;margin:20px 0;">
+        <p style="margin:0;"><strong>Item:</strong> ${product.name}</p>
         <p style="margin:4px 0 0;"><strong>Price:</strong> Rs ${product.price}</p>
       </div>
       <p>Thanks for selling with us!</p>
@@ -120,22 +120,22 @@ async function sendProductApprovedEmail(toEmail, product) {
   `;
 
   await transporter.sendMail({
-    from: `"Handmade Boutique" <${process.env.EMAIL_USER}>`,
+    from: `"ReLoved" <${process.env.EMAIL_USER}>`,
     to: toEmail,
-    subject: `Your product "${product.name}" is approved`,
+    subject: `Your listing "${product.name}" is approved`,
     html,
   });
 }
 
 async function sendProductRejectedEmail(toEmail, product) {
   const html = `
-    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#2B2420;">
-      <h2 style="color:#8C4A3A;">Handmade Boutique</h2>
+    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#1A2E2A;">
+      <h2 style="color:#4A6B5A;">ReLoved</h2>
       <p>Hi there,</p>
-      <p>Unfortunately, your product <strong>${product.name}</strong> was not approved for listing.</p>
+      <p>Unfortunately, your listing <strong>${product.name}</strong> was not approved.</p>
       ${
         product.rejectionReason
-          ? `<div style="background:#FAF3EC;padding:16px;border-radius:8px;margin:20px 0;">
+          ? `<div style="background:#E8EDE6;padding:16px;border-radius:8px;margin:20px 0;">
               <p style="margin:0;"><strong>Reason:</strong> ${product.rejectionReason}</p>
             </div>`
           : ""
@@ -145,17 +145,17 @@ async function sendProductRejectedEmail(toEmail, product) {
   `;
 
   await transporter.sendMail({
-    from: `"Handmade Boutique" <${process.env.EMAIL_USER}>`,
+    from: `"ReLoved" <${process.env.EMAIL_USER}>`,
     to: toEmail,
-    subject: `Your product "${product.name}" was not approved`,
+    subject: `Your listing "${product.name}" was not approved`,
     html,
   });
 }
 
 async function sendAccountStatusEmail(toEmail, isActive) {
   const html = `
-    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#2B2420;">
-      <h2 style="color:#8C4A3A;">Handmade Boutique</h2>
+    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#1A2E2A;">
+      <h2 style="color:#4A6B5A;">ReLoved</h2>
       <p>Hi there,</p>
       <p>Your account has been <strong>${isActive ? "reactivated" : "deactivated"}</strong> by an administrator.</p>
       ${
@@ -167,24 +167,25 @@ async function sendAccountStatusEmail(toEmail, isActive) {
   `;
 
   await transporter.sendMail({
-    from: `"Handmade Boutique" <${process.env.EMAIL_USER}>`,
+    from: `"ReLoved" <${process.env.EMAIL_USER}>`,
     to: toEmail,
     subject: `Your account has been ${isActive ? "reactivated" : "deactivated"}`,
     html,
   });
 }
+
 async function sendSellerRequestApprovedEmail(toEmail) {
   const html = `
-    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#2B2420;">
-      <h2 style="color:#8C4A3A;">Handmade Boutique</h2>
+    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#1A2E2A;">
+      <h2 style="color:#4A6B5A;">ReLoved</h2>
       <p>Good news!</p>
-      <p>Your request to become a seller has been <strong>approved</strong>. You can now log in and start listing your products.</p>
-      <p>Thanks for joining our community of makers!</p>
+      <p>Your request to become a seller has been <strong>approved</strong>. You can now log in and start listing your pre-loved items.</p>
+      <p>Thanks for joining our community!</p>
     </div>
   `;
 
   await transporter.sendMail({
-    from: `"Handmade Boutique" <${process.env.EMAIL_USER}>`,
+    from: `"ReLoved" <${process.env.EMAIL_USER}>`,
     to: toEmail,
     subject: `Your seller request has been approved`,
     html,
@@ -193,8 +194,8 @@ async function sendSellerRequestApprovedEmail(toEmail) {
 
 async function sendSellerRequestRejectedEmail(toEmail) {
   const html = `
-    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#2B2420;">
-      <h2 style="color:#8C4A3A;">Handmade Boutique</h2>
+    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#1A2E2A;">
+      <h2 style="color:#4A6B5A;">ReLoved</h2>
       <p>Hi there,</p>
       <p>Unfortunately, your request to become a seller was not approved at this time.</p>
       <p>If you believe this is a mistake, please contact our support team.</p>
@@ -202,7 +203,7 @@ async function sendSellerRequestRejectedEmail(toEmail) {
   `;
 
   await transporter.sendMail({
-    from: `"Handmade Boutique" <${process.env.EMAIL_USER}>`,
+    from: `"ReLoved" <${process.env.EMAIL_USER}>`,
     to: toEmail,
     subject: `Your seller request was not approved`,
     html,

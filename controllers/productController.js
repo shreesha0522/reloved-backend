@@ -43,7 +43,7 @@ exports.createProduct = async (req, res) => {
       return res.status(403).json({ success: false, message: "Only sellers can add products" });
     }
 
-    const { name, price, category, subcategory, image, description, stock } = req.body;
+    const { name, price, category, subcategory, image, description, stock, condition } = req.body;
 
     if (!name || !price || !category || !image) {
       return res.status(400).json({ success: false, message: "Name, price, category, and image are required" });
@@ -57,6 +57,7 @@ exports.createProduct = async (req, res) => {
       image,
       description,
       stock,
+      condition,
       sellerId: req.userId,
     });
 
@@ -86,7 +87,7 @@ exports.updateProduct = async (req, res) => {
       return res.status(404).json({ success: false, message: "Product not found or not yours" });
     }
 
-    const { name, price, category, subcategory, image, description, stock } = req.body;
+    const { name, price, category, subcategory, image, description, stock, condition } = req.body;
     if (name !== undefined) product.name = name;
     if (price !== undefined) product.price = price;
     if (category !== undefined) product.category = category;
@@ -94,6 +95,7 @@ exports.updateProduct = async (req, res) => {
     if (image !== undefined) product.image = image;
     if (description !== undefined) product.description = description;
     if (stock !== undefined) product.stock = stock;
+    if (condition !== undefined) product.condition = condition;
 
     await product.save();
     res.status(200).json({ success: true, product });

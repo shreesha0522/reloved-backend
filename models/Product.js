@@ -8,6 +8,11 @@ const productSchema = new mongoose.Schema(
     image: { type: String },
     description: { type: String, default: "" },
     stock: { type: Number, default: 10 },
+    condition: {
+  type: String,
+  enum: ["Like New", "Good", "Fair"],
+  default: "Good",
+},
     rating: { type: Number, default: 0 },
     reviews: { type: Number, default: 0 },
     sellerId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
