@@ -32,7 +32,7 @@ app.use("/api/reviews", require("./routes/reviewRoutes"));
 
 
 app.get("/", (req, res) => {
-  res.send("Handmade Boutique API is running 🚀");
+  res.send("ReLoved API is running 🚀");
 });
 
 const PORT = process.env.PORT || 5000;

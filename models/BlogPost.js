@@ -7,7 +7,7 @@ const blogPostSchema = new mongoose.Schema(
     excerpt: { type: String, required: true },
     content: { type: String, required: true },
     image: { type: String, required: true },
-    author: { type: String, default: "Handmade Boutique" },
+  author: { type: String, default: "ReLoved Team" },
   },
   { timestamps: true }
 );
