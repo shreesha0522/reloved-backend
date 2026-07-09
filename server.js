@@ -10,8 +10,13 @@ const productRoutes = require("./routes/productRoutes");
 const app = express();
 
 app.use(cors({
-  origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"],
-  credentials: true,
+origin: [
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "http://localhost:3002",
+  "https://reloved-website.vercel.app",
+],
+credentials: true,
 }));
 app.use(express.json());
 
