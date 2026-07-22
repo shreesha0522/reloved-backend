@@ -8,6 +8,16 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     role: { type: String, enum: ["admin", "user", "seller"], default: "user" },
     sellerRequestStatus: { type: String, enum: ["none", "pending", "approved", "rejected"], default: "none" },
+
+    // --- brute-force protection ---
+    failedLoginAttempts: { type: Number, default: 0 },
+    lockUntil: { type: Date, default: null },
+
+    address: {
+      street: { type: String, default: "" },
+      city: { type: String, default: "" },
+      phone: { type: String, default: "" },
+    },
     wishlist: [
       {
         id: String,
@@ -39,6 +49,11 @@ userSchema.pre("save", async function () {
 
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
+};
+
+// Returns true if the account is currently locked out
+userSchema.methods.isLocked = function () {
+  return !!(this.lockUntil && this.lockUntil > Date.now());
 };
 
 module.exports = mongoose.model("User", userSchema);
