@@ -13,6 +13,11 @@ const productRoutes = require("./routes/productRoutes");
 
 const app = express();
 
+// Render (and most cloud hosts) sit behind a reverse proxy that sets
+// X-Forwarded-For. Without this, express-rate-limit throws an error trying
+// to determine the real client IP, since it can't trust that header by default.
+app.set("trust proxy", 1);
+
 // --- Security headers ---
 // Sets sensible defaults (X-Content-Type-Options, X-Frame-Options, etc.)
 // to reduce common attack surface (clickjacking, MIME sniffing, etc.)
