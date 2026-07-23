@@ -13,6 +13,10 @@ const userSchema = new mongoose.Schema(
     failedLoginAttempts: { type: Number, default: 0 },
     lockUntil: { type: Date, default: null },
 
+    // --- multi-factor authentication (TOTP) ---
+    mfaSecret: { type: String, default: null },   // base32 secret, only set once user starts setup
+    mfaEnabled: { type: Boolean, default: false }, // only true once setup is confirmed
+
     address: {
       street: { type: String, default: "" },
       city: { type: String, default: "" },

@@ -4,6 +4,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
 const rateLimit = require("express-rate-limit");
+const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const wishlistRoutes = require("./routes/wishlistRoutes");
@@ -28,6 +29,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use(cookieParser());
 
 // --- Input sanitization ---
 // Strips any keys starting with "$" or containing "." from req.body/query/params,
@@ -52,6 +54,7 @@ app.use(globalLimiter);
 connectDB();
 
 app.use("/api/auth", authRoutes);
+app.use("/api/mfa", require("./routes/mfaRoutes"));
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/products", productRoutes);
