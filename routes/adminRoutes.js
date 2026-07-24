@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const protect = require("../middleware/authMiddleware");
 const adminOnly = require("../middleware/adminOnly");
+const { getAuditLogs } = require("../controllers/auditController");
+router.get("/audit-logs", protect, adminOnly, getAuditLogs);
 const {
   getAllUsers,
   getUserById,
