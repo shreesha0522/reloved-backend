@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const Product = require("../models/Product");
+const AuditLog = require("../models/AuditLog");
 const {
   sendProductApprovedEmail,
   sendProductRejectedEmail,
@@ -15,7 +16,7 @@ const getAllUsers = async (req, res) => {
     const query = {};
     if (search) {
       query.$or = [
-        { name: { $regex: search, $options: "i" } },
+        { username: { $regex: search, $options: "i" } },
         { email: { $regex: search, $options: "i" } },
       ];
     }
@@ -54,6 +55,12 @@ const updateUserStatus = async (req, res) => {
     const user = await User.findByIdAndUpdate(req.params.id, { isActive }, { new: true }).select("-password");
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
+    await AuditLog.create({
+      action: isActive ? "USER_ACTIVATED" : "USER_DEACTIVATED",
+      performedBy: req.userId,
+      targetUser: user._id,
+    });
+
     try {
       if (user.email) {
         await sendAccountStatusEmail(user.email, isActive);
@@ -75,8 +82,18 @@ const updateUserRole = async (req, res) => {
     if (!allowedRoles.includes(role)) {
       return res.status(400).json({ success: false, message: "Invalid role" });
     }
+    const oldUser = await User.findById(req.params.id);
+    if (!oldUser) return res.status(404).json({ success: false, message: "User not found" });
+
     const user = await User.findByIdAndUpdate(req.params.id, { role }, { new: true }).select("-password");
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    await AuditLog.create({
+      action: "ROLE_UPDATED",
+      performedBy: req.userId,
+      targetUser: user._id,
+      details: { oldRole: oldUser.role, newRole: role },
+    });
+
     res.json({ success: true, message: "Role updated", user });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -85,8 +102,17 @@ const updateUserRole = async (req, res) => {
 
 const deleteUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
+    const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    await AuditLog.create({
+      action: "USER_DELETED",
+      performedBy: req.userId,
+      targetUser: user._id,
+      details: { deletedEmail: user.email, deletedUsername: user.username },
+    });
+
+    await User.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: "User deleted" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -153,6 +179,7 @@ const rejectProduct = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 // GET /api/admin/seller-requests
 const getSellerRequests = async (req, res) => {
   try {
