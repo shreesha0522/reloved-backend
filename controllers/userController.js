@@ -62,8 +62,30 @@ exports.updateProfile = async (req, res) => {
       if (!isMatch) {
         return res.status(401).json({ success: false, message: "Current password is incorrect" });
       }
+
+      // Reuse prevention — block reusing the current password or any of the last 5
+      const isSameAsCurrent = await bcrypt.compare(newPassword, user.password);
+      if (isSameAsCurrent) {
+        return res.status(400).json({
+          success: false,
+          message: "New password must be different from your current password",
+        });
+      }
+      for (const oldHash of user.passwordHistory || []) {
+        const reused = await bcrypt.compare(newPassword, oldHash);
+        if (reused) {
+          return res.status(400).json({
+            success: false,
+            message: "You cannot reuse a recent password. Please choose a different one.",
+          });
+        }
+      }
+
+      // Push current hash into history (keep last 5) before overwriting
+      user.passwordHistory = [user.password, ...(user.passwordHistory || [])].slice(0, 5);
       // Set plain text here — the model's pre-save hook will hash it on save
       user.password = newPassword;
+      user.passwordChangedAt = new Date();
     }
     await user.save();
     res.status(200).json({
