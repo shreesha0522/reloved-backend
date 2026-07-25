@@ -136,7 +136,13 @@ exports.verifyLoginMFA = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Login successful",
-      data: { _id: user._id, username: user.username, email: user.email, role: user.role },
+      data: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        passwordExpired: user.isPasswordExpired(),
+      },
     });
   } catch (error) {
     console.error("verifyLoginMFA error:", error.message);
