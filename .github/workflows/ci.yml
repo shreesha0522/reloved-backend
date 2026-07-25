@@ -31,7 +31,7 @@ jobs:
         run: |
           timeout 10s node server.js &
           sleep 5
-          curl -f http://localhost:4001/ || exit 1
+          curl -f http://localhost:5000/ || exit 1
         env:
           MONGO_URI: ${{ secrets.MONGO_URI }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
