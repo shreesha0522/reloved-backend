@@ -3,6 +3,7 @@ const qrcode = require("qrcode");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
+const { encrypt, decrypt } = require("../utils/encryption");
 
 const generateToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
@@ -36,7 +37,7 @@ exports.setupMFA = async (req, res) => {
       name: `ReLoved (${user.email})`,
     });
 
-    user.mfaSecret = secret.base32;
+    user.mfaSecret = encrypt(secret.base32);
     user.mfaEnabled = false; // not active until confirmed
     await user.save();
 
@@ -66,7 +67,7 @@ exports.verifySetupMFA = async (req, res) => {
     }
 
     const verified = speakeasy.totp.verify({
-      secret: user.mfaSecret,
+      secret: decrypt(user.mfaSecret),
       encoding: "base32",
       token: code,
       window: 1, // allows the code from 1 step before/after, for clock drift
@@ -116,7 +117,7 @@ exports.verifyLoginMFA = async (req, res) => {
     }
 
     const verified = speakeasy.totp.verify({
-      secret: user.mfaSecret,
+      secret: decrypt(user.mfaSecret),
       encoding: "base32",
       token: code,
       window: 1,

@@ -2,6 +2,8 @@ const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const validatePassword = require("../utils/validatePassword");
+const { recordFailedAttempt, clearFailedAttempts } = require("../middleware/ipBlocklist");
+const verifyCaptcha = require("../utils/verifyCaptcha");
 
 const MAX_ATTEMPTS = 5;
 const LOCK_TIME = 15 * 60 * 1000; // 15 minutes
@@ -31,7 +33,13 @@ const pendingCookieOptions = {
 
 exports.register = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, captchaToken } = req.body;
+
+    const captchaValid = await verifyCaptcha(captchaToken);
+    if (!captchaValid) {
+      return res.status(400).json({ success: false, message: "CAPTCHA verification failed. Please try again." });
+    }
+
     if (!username || !email || !password) {
       return res.status(400).json({ success: false, message: "All fields are required" });
     }
@@ -62,7 +70,13 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, captchaToken } = req.body;
+
+    const captchaValid = await verifyCaptcha(captchaToken);
+    if (!captchaValid) {
+      return res.status(400).json({ success: false, message: "CAPTCHA verification failed. Please try again." });
+    }
+
     if (!email || !password) {
       return res.status(400).json({ success: false, message: "Email and password are required" });
     }
@@ -83,6 +97,7 @@ exports.login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
+      recordFailedAttempt(req);
       user.failedLoginAttempts += 1;
 
       if (user.failedLoginAttempts >= MAX_ATTEMPTS) {
@@ -100,6 +115,7 @@ exports.login = async (req, res) => {
     }
 
     // Password correct — reset failed attempt tracking either way
+    clearFailedAttempts(req);
     user.failedLoginAttempts = 0;
     user.lockUntil = null;
     await user.save();

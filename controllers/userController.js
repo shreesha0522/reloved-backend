@@ -1,5 +1,27 @@
 const User = require("../models/User");
+const Order = require("../models/Order");
+const Review = require("../models/Review");
+// Decrypts an address object's fields for API responses. Falls back to the
+// raw value if decryption fails (e.g. legacy unencrypted data).
+function decryptAddress(address) {
+  if (!address) return address;
+  const safe = (val) => {
+    if (!val) return val;
+    try {
+      return decrypt(val);
+    } catch {
+      return val; // legacy plaintext, or empty — return as-is
+    }
+  };
+  return {
+    street: safe(address.street),
+    city: safe(address.city),
+    phone: safe(address.phone),
+  };
+}
+
 const bcrypt = require("bcryptjs");
+const { encrypt, decrypt } = require("../utils/encryption");
 // GET /api/user/me
 exports.getProfile = async (req, res) => {
   try {
@@ -15,7 +37,7 @@ exports.getProfile = async (req, res) => {
         email: user.email,
         role: user.role,
         sellerRequestStatus: user.sellerRequestStatus,
-        address: user.address,
+        address: decryptAddress(user.address),
       },
     });
   } catch (error) {
@@ -44,10 +66,11 @@ exports.updateProfile = async (req, res) => {
     }
     // Only touch address fields the user actually sent
     if (address) {
+      const existingDecrypted = decryptAddress(user.address) || {};
       user.address = {
-        street: address.street ?? user.address?.street ?? "",
-        city: address.city ?? user.address?.city ?? "",
-        phone: address.phone ?? user.address?.phone ?? "",
+        street: encrypt(address.street ?? existingDecrypted.street ?? ""),
+        city: encrypt(address.city ?? existingDecrypted.city ?? ""),
+        phone: encrypt(address.phone ?? existingDecrypted.phone ?? ""),
       };
     }
     // Only touch password if the user is actually trying to change it
@@ -96,7 +119,7 @@ exports.updateProfile = async (req, res) => {
         username: user.username,
         email: user.email,
         role: user.role,
-        address: user.address,
+        address: decryptAddress(user.address),
       },
     });
   } catch (error) {
@@ -104,6 +127,46 @@ exports.updateProfile = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// GET /api/user/export-data — protected. Lets a user download all their
+// personal data as a single JSON file (profile, orders, reviews, wishlist,
+// cart, address). Supports the "right to data portability" — a standard
+// privacy requirement (e.g. GDPR Article 20).
+exports.exportUserData = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId).select("-password -passwordHistory -mfaSecret");
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const orders = await Order.find({ userId: req.userId });
+    const reviews = await Review.find({ userId: req.userId });
+
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      profile: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        address: decryptAddress(user.address),
+        createdAt: user.createdAt,
+      },
+      wishlist: user.wishlist,
+      cart: user.cart,
+      orders,
+      reviews,
+    };
+
+    res.setHeader("Content-Disposition", `attachment; filename="my-data-export.json"`);
+    res.setHeader("Content-Type", "application/json");
+    res.status(200).send(JSON.stringify(exportData, null, 2));
+  } catch (error) {
+    console.error("exportUserData error:", error.message);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // POST /api/user/request-seller
 exports.requestSeller = async (req, res) => {
   try {
