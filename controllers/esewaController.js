@@ -3,8 +3,8 @@ const Order = require("../models/Order");
 const { generateEsewaSignature } = require("../utils/esewaSignature");
 const User = require("../models/User");
 const { sendOrderConfirmationEmail } = require("../utils/sendEmail");
+const logActivity = require("../utils/logActivity");
 
-// POST /api/esewa/initiate
 exports.initiateEsewaPayment = async (req, res) => {
   try {
     const { orderId } = req.body;
@@ -14,8 +14,6 @@ exports.initiateEsewaPayment = async (req, res) => {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
 
-    // eSewa requires exact 2-decimal string amounts, and the signature
-    // must be built from the SAME formatted strings sent in the form.
     const totalAmount = order.total.toFixed(2);
     const transactionUuid = `${order.orderNumber}-${Date.now()}`;
 
@@ -26,6 +24,8 @@ exports.initiateEsewaPayment = async (req, res) => {
 
     order.transactionUuid = transactionUuid;
     await order.save();
+
+    logActivity("PAYMENT_INITIATED", { userId: req.userId, ip: req.ip, details: { orderId: order._id } });
 
     res.status(200).json({
       success: true,
@@ -50,7 +50,6 @@ exports.initiateEsewaPayment = async (req, res) => {
   }
 };
 
-// POST /api/esewa/verify  — called by the frontend after eSewa redirects back with ?data=...
 exports.verifyEsewaPayment = async (req, res) => {
   try {
     const { data } = req.body;
@@ -65,9 +64,6 @@ exports.verifyEsewaPayment = async (req, res) => {
       return res.status(400).json({ success: false, message: "Missing signed_field_names in response" });
     }
 
-    // Build the signing string dynamically from whatever fields eSewa actually
-    // signed, in the exact order eSewa specifies — never hardcode this list,
-    // since eSewa's response includes more fields than the request did.
     const fieldsToSign = signed_field_names.split(",");
     const message = fieldsToSign.map((field) => `${field}=${decoded[field]}`).join(",");
 
@@ -77,6 +73,7 @@ exports.verifyEsewaPayment = async (req, res) => {
       .digest("base64");
 
     if (expectedSignature !== signature) {
+      logActivity("PAYMENT_SIGNATURE_MISMATCH", { userId: req.userId, ip: req.ip, details: { transaction_uuid } });
       return res.status(400).json({ success: false, message: "Signature mismatch — possible tampering" });
     }
 
@@ -84,16 +81,15 @@ exports.verifyEsewaPayment = async (req, res) => {
       return res.status(400).json({ success: false, message: "Payment not completed" });
     }
 
-    // Step 2 — never trust the redirect alone; confirm independently via eSewa's status API
     const statusUrl = `${process.env.ESEWA_STATUS_URL}?product_code=${product_code}&total_amount=${total_amount}&transaction_uuid=${transaction_uuid}`;
     const statusRes = await fetch(statusUrl);
     const statusData = await statusRes.json();
 
     if (statusData.status !== "COMPLETE") {
+      logActivity("PAYMENT_VERIFICATION_FAILED", { userId: req.userId, ip: req.ip, details: { transaction_uuid } });
       return res.status(400).json({ success: false, message: "Payment could not be verified with eSewa" });
     }
 
-    // Step 3 — find the matching order and mark it paid
     const order = await Order.findOne({ transactionUuid: transaction_uuid, userId: req.userId });
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found for this transaction" });
@@ -102,7 +98,8 @@ exports.verifyEsewaPayment = async (req, res) => {
     order.paymentStatus = "paid";
     await order.save();
 
-    // Step 4 — send order confirmation email (best-effort, never block the payment response)
+    logActivity("PAYMENT_VERIFIED", { userId: req.userId, ip: req.ip, details: { orderId: order._id, transaction_uuid } });
+
     try {
       const user = await User.findById(req.userId);
       if (user?.email) {

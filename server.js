@@ -71,6 +71,7 @@ app.use("/api/seller", require("./routes/sellerRoutes"));
 app.use("/api/admin/users", require("./routes/adminRoutes"));
 app.use("/api/admin/products", require("./routes/adminProductRoutes"));
 app.use("/api/reviews", require("./routes/reviewRoutes"));
+app.use("/api/activity-logs", require("./routes/activityLogs"));
 
 app.get("/", (req, res) => {
   res.send("ReLoved API is running 🚀");

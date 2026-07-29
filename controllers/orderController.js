@@ -1,8 +1,8 @@
 const Order = require("../models/Order");
 const User = require("../models/User");
 const { sendOrderConfirmationEmail, sendOrderStatusEmail } = require("../utils/sendEmail");
+const logActivity = require("../utils/logActivity");
 
-// POST /api/orders  — create an order from the current cart, then clear the cart
 exports.createOrder = async (req, res) => {
   try {
     const { deliveryOption, shippingAddress, paymentMethod } = req.body;
@@ -38,6 +38,8 @@ exports.createOrder = async (req, res) => {
     user.cart = [];
     await user.save();
 
+    logActivity("ORDER_CREATED", { userId: user._id, ip: req.ip, details: { orderId: order._id, total } });
+
     res.status(201).json({ success: true, order });
   } catch (error) {
     console.error("createOrder error:", error.message);
@@ -45,7 +47,6 @@ exports.createOrder = async (req, res) => {
   }
 };
 
-// GET /api/orders  — all orders for the logged-in user
 exports.getMyOrders = async (req, res) => {
   try {
     const orders = await Order.find({ userId: req.userId }).sort({ createdAt: -1 });
@@ -56,7 +57,6 @@ exports.getMyOrders = async (req, res) => {
   }
 };
 
-// GET /api/orders/:id  — a single order, for the order-success/track-order pages
 exports.getOrderById = async (req, res) => {
   try {
     const order = await Order.findOne({ _id: req.params.id, userId: req.userId });
@@ -70,7 +70,6 @@ exports.getOrderById = async (req, res) => {
   }
 };
 
-// GET /api/orders/seller/mine  — orders containing at least one item belonging to this seller
 exports.getSellerOrders = async (req, res) => {
   try {
     const user = await User.findById(req.userId);
@@ -98,7 +97,6 @@ exports.getSellerOrders = async (req, res) => {
   }
 };
 
-// PUT /api/orders/:id/status  — seller updates status, only if they own at least one item in the order
 exports.updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -120,6 +118,8 @@ exports.updateOrderStatus = async (req, res) => {
     }
     order.orderStatus = status;
     await order.save();
+
+    logActivity("ORDER_STATUS_UPDATED", { userId: req.userId, ip: req.ip, details: { orderId: order._id, status } });
 
     try {
       const customer = await User.findById(order.userId);
