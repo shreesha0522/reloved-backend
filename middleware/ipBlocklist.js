@@ -11,11 +11,11 @@ const FAILED_ATTEMPT_LIMIT = 25;   // across ALL accounts, from one IP
 const ATTEMPT_WINDOW_MS = 3 * 60 * 60 * 1000; // 3 hours
 const BLOCK_DURATION_MS = 60 * 60 * 1000; // 1 hour block
 
-// ip -> { count, windowStart, blockedUntil }
+const { sendSecurityAlertEmail } = require("../utils/sendEmail");
+
 const ipTracker = new Map();
 
 function getClientIp(req) {
-  // req.ip respects Express's "trust proxy" setting already configured in server.js
   return req.ip;
 }
 
@@ -31,6 +31,12 @@ function isIpBlocked(req, res, next) {
     });
   }
 
+  // Once a previous block has expired, allow a fresh alert to fire again
+  // for this IP instead of silently staying suppressed forever.
+  if (record && record.blockedUntil && record.blockedUntil <= Date.now()) {
+    record.alertSent = false;
+  }
+
   next();
 }
 
@@ -40,14 +46,20 @@ function recordFailedAttempt(req) {
   let record = ipTracker.get(ip);
 
   if (!record || now - record.windowStart > ATTEMPT_WINDOW_MS) {
-    // Start a fresh window
-    record = { count: 1, windowStart: now, blockedUntil: null };
+    record = { count: 1, windowStart: now, blockedUntil: null, alertSent: false };
   } else {
     record.count += 1;
   }
 
-  if (record.count >= FAILED_ATTEMPT_LIMIT) {
+  if (record.count >= FAILED_ATTEMPT_LIMIT && !record.alertSent) {
     record.blockedUntil = now + BLOCK_DURATION_MS;
+    record.alertSent = true;
+    sendSecurityAlertEmail("IP Address Blocked", {
+      ip,
+      failedAttempts: record.count,
+      windowHours: ATTEMPT_WINDOW_MS / (60 * 60 * 1000),
+      blockedForMinutes: BLOCK_DURATION_MS / 60000,
+    }).catch(() => {});
   }
 
   ipTracker.set(ip, record);
