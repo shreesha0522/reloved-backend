@@ -1,7 +1,7 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const validatePassword = require("../utils/validatePassword");
+const { validatePassword } = require("../utils/validatePassword");
 const { recordFailedAttempt, clearFailedAttempts } = require("../middleware/ipBlocklist");
 const { sendSecurityAlertEmail } = require("../utils/sendEmail");
 const verifyCaptcha = require("../utils/verifyCaptcha");
