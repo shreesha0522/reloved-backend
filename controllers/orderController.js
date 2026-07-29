@@ -45,33 +45,6 @@ exports.createOrder = async (req, res) => {
   }
 };
 
-// PUT /api/orders/:id/pay  — mark an order as paid, then email the customer
-exports.markOrderPaid = async (req, res) => {
-  try {
-    const order = await Order.findOne({ _id: req.params.id, userId: req.userId });
-    if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" });
-    }
-
-    order.paymentStatus = "paid";
-    await order.save();
-
-    try {
-      const user = await User.findById(req.userId);
-      if (user?.email) {
-        await sendOrderConfirmationEmail(user.email, order);
-      }
-    } catch (emailError) {
-      console.error("Order confirmation email failed:", emailError.message);
-    }
-
-    res.status(200).json({ success: true, order });
-  } catch (error) {
-    console.error("markOrderPaid error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
 // GET /api/orders  — all orders for the logged-in user
 exports.getMyOrders = async (req, res) => {
   try {
