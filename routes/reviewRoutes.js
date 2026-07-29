@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const protect = require("../middleware/authMiddleware");
+const { protect } = require("../middleware/authMiddleware");
+
 const { getProductReviews, createReview, deleteReview } = require("../controllers/reviewController");
 
 router.get("/:productId", getProductReviews);

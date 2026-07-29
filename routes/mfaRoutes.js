@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const protect = require("../middleware/authMiddleware");
+const { protect } = require("../middleware/authMiddleware");
+
 const mfaLimiter = require("../middleware/mfaLimiter");
 const {
   setupMFA,

@@ -8,7 +8,8 @@ const {
   updatePost,
   deletePost,
 } = require("../controllers/blogController");
-const protect = require("../middleware/authMiddleware");
+const { protect } = require("../middleware/authMiddleware");
+
 const adminOnly = require("../middleware/adminOnly");
 
 router.get("/", getAllPosts);
