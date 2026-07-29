@@ -15,6 +15,35 @@ exports.getWishlist = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+// DELETE /api/wishlist/:id
+exports.removeFromWishlist = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    if (!user.wishlist) {
+      user.wishlist = [];
+    }
+
+    const index = user.wishlist.findIndex((item) => item.id === id);
+    if (index === -1) {
+      return res.status(404).json({ success: false, message: "Item not found in wishlist" });
+    }
+
+    user.wishlist.splice(index, 1);
+    await user.save();
+
+    res.status(200).json({ success: true, wishlist: user.wishlist });
+  } catch (error) {
+    console.error("removeFromWishlist error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 
 // POST /api/wishlist/toggle
 exports.toggleWishlistItem = async (req, res) => {
