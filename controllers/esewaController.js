@@ -72,7 +72,7 @@ exports.verifyEsewaPayment = async (req, res) => {
       .update(message)
       .digest("base64");
 
-    if (expectedSignature !== signature) {
+    if (!crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(signature))) {
       logActivity("PAYMENT_SIGNATURE_MISMATCH", { userId: req.userId, ip: req.ip, details: { transaction_uuid } });
       return res.status(400).json({ success: false, message: "Signature mismatch — possible tampering" });
     }
