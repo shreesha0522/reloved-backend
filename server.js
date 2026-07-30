@@ -56,7 +56,7 @@ const globalLimiter = rateLimit({
 });
 app.use(globalLimiter);
 
-connectDB();
+connectDB().then(() => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/mfa", require("./routes/mfaRoutes"));
@@ -87,4 +87,5 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+});
 });
