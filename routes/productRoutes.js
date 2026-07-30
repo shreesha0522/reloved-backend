@@ -1,10 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const protect = require("../middleware/authMiddleware");
+
+const { protect, sellerOnly } = require("../middleware/authMiddleware");
+
 const {
+  createProduct,
   getAllProducts,
   getProductById,
-  createProduct,
   getMyProducts,
   updateProduct,
   deleteProduct,
@@ -12,12 +14,12 @@ const {
 
 // Public routes
 router.get("/", getAllProducts);
-router.get("/seller/mine", protect, getMyProducts);
 router.get("/:id", getProductById);
 
-// Seller-only routes
-router.post("/", protect, createProduct);
-router.put("/:id", protect, updateProduct);
-router.delete("/:id", protect, deleteProduct);
+// Seller routes
+router.get("/seller/mine", protect, sellerOnly, getMyProducts);
+router.post("/add", protect, sellerOnly, createProduct);
+router.put("/:id", protect, sellerOnly, updateProduct);
+router.delete("/:id", protect, sellerOnly, deleteProduct);
 
 module.exports = router;

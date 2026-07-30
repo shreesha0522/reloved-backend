@@ -210,7 +210,39 @@ async function sendSellerRequestRejectedEmail(toEmail) {
   });
 }
 
+
+// Sends a real-time security alert to the site admin when a serious
+// security event occurs (IP blocked, account locked, etc.). Fire-and-forget
+// by design — a failed alert email should never break the request that
+// triggered it, so callers should not await this in a blocking way that
+// fails the response.
+async function sendSecurityAlertEmail(eventType, details) {
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#1A2E2A;">
+      <h2 style="color:#C0392B;">⚠️ Security Alert — ReLoved</h2>
+      <p><strong>Event:</strong> ${eventType}</p>
+      <div style="background:#FDEDEC;padding:16px;border-radius:8px;margin:20px 0;border-left:4px solid #C0392B;">
+        <pre style="margin:0;white-space:pre-wrap;font-family:monospace;font-size:13px;">${JSON.stringify(details, null, 2)}</pre>
+      </div>
+      <p style="font-size:13px;color:#6B7B76;">Detected at ${new Date().toISOString()}</p>
+    </div>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: `"ReLoved Security" <${process.env.EMAIL_USER}>`,
+      to: process.env.EMAIL_USER, // alerts go to the site admin
+      subject: `🚨 Security Alert: ${eventType}`,
+      html,
+    });
+  } catch (err) {
+    // Never let an alerting failure crash the request that triggered it
+    console.error("Failed to send security alert email:", err.message);
+  }
+}
+
 module.exports = {
+  sendSecurityAlertEmail,
   sendOrderConfirmationEmail,
   sendOrderStatusEmail,
   sendProductApprovedEmail,
