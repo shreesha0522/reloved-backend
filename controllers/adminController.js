@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const Product = require("../models/Product");
+const AuditLog = require("../models/AuditLog");
 const {
   sendProductApprovedEmail,
   sendProductRejectedEmail,
@@ -15,7 +16,7 @@ const getAllUsers = async (req, res) => {
     const query = {};
     if (search) {
       query.$or = [
-        { name: { $regex: search, $options: "i" } },
+        { username: { $regex: search, $options: "i" } },
         { email: { $regex: search, $options: "i" } },
       ];
     }
@@ -31,7 +32,7 @@ const getAllUsers = async (req, res) => {
 
     res.json({ success: true, users, total, page: Number(page), totalPages: Math.ceil(total / Number(limit)) });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -41,7 +42,7 @@ const getUserById = async (req, res) => {
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
     res.json({ success: true, user });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -54,6 +55,12 @@ const updateUserStatus = async (req, res) => {
     const user = await User.findByIdAndUpdate(req.params.id, { isActive }, { new: true }).select("-password");
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
+    await AuditLog.create({
+      action: isActive ? "USER_ACTIVATED" : "USER_DEACTIVATED",
+      performedBy: req.userId,
+      targetUser: user._id,
+    });
+
     try {
       if (user.email) {
         await sendAccountStatusEmail(user.email, isActive);
@@ -64,7 +71,7 @@ const updateUserStatus = async (req, res) => {
 
     res.json({ success: true, message: `User ${isActive ? "activated" : "deactivated"}`, user });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -75,21 +82,40 @@ const updateUserRole = async (req, res) => {
     if (!allowedRoles.includes(role)) {
       return res.status(400).json({ success: false, message: "Invalid role" });
     }
+    const oldUser = await User.findById(req.params.id);
+    if (!oldUser) return res.status(404).json({ success: false, message: "User not found" });
+
     const user = await User.findByIdAndUpdate(req.params.id, { role }, { new: true }).select("-password");
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    await AuditLog.create({
+      action: "ROLE_UPDATED",
+      performedBy: req.userId,
+      targetUser: user._id,
+      details: { oldRole: oldUser.role, newRole: role },
+    });
+
     res.json({ success: true, message: "Role updated", user });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
 const deleteUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
+    const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    await AuditLog.create({
+      action: "USER_DELETED",
+      performedBy: req.userId,
+      targetUser: user._id,
+      details: { deletedEmail: user.email, deletedUsername: user.username },
+    });
+
+    await User.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: "User deleted" });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -101,7 +127,7 @@ const getPendingProducts = async (req, res) => {
       .sort({ createdAt: -1 });
     res.json({ success: true, products });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -125,7 +151,7 @@ const approveProduct = async (req, res) => {
 
     res.json({ success: true, message: "Product approved", product });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -150,9 +176,10 @@ const rejectProduct = async (req, res) => {
 
     res.json({ success: true, message: "Product rejected", product });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
+
 // GET /api/admin/seller-requests
 const getSellerRequests = async (req, res) => {
   try {
@@ -161,7 +188,7 @@ const getSellerRequests = async (req, res) => {
       .sort({ createdAt: -1 });
     res.json({ success: true, users });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -185,7 +212,7 @@ const approveSellerRequest = async (req, res) => {
 
     res.json({ success: true, message: "Seller request approved", user });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -209,7 +236,7 @@ const rejectSellerRequest = async (req, res) => {
 
     res.json({ success: true, message: "Seller request rejected", user });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 

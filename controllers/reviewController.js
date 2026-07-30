@@ -23,7 +23,7 @@ exports.getProductReviews = async (req, res) => {
     res.status(200).json({ success: true, reviews });
   } catch (error) {
     console.error("getProductReviews error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -68,7 +68,7 @@ exports.createReview = async (req, res) => {
     res.status(201).json({ success: true, review });
   } catch (error) {
     console.error("createReview error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -87,6 +87,6 @@ exports.deleteReview = async (req, res) => {
     res.status(200).json({ success: true, message: "Review deleted" });
   } catch (error) {
     console.error("deleteReview error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
