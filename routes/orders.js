@@ -1,10 +1,10 @@
 // routes/orders.js
 const express = require("express");
 const router = express.Router();
-const protect = require("../middleware/authMiddleware");
+const { protect } = require("../middleware/authMiddleware");
+
 const {
   createOrder,
-  markOrderPaid,
   getMyOrders,
   getOrderById,
   updateOrderStatus,
@@ -13,7 +13,7 @@ const {
 router.post("/", protect, createOrder);
 router.get("/", protect, getMyOrders);
 router.get("/:id", protect, getOrderById);
-router.put("/:id/pay", protect, markOrderPaid);
+
 router.put("/:id/status", protect, updateOrderStatus);
 
 module.exports = router;
