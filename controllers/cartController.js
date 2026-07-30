@@ -64,7 +64,7 @@ exports.getCart = async (req, res) => {
     res.status(200).json({ success: true, cart: syncedCart });
   } catch (error) {
     console.error("getCart error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -126,7 +126,7 @@ exports.addToCart = async (req, res) => {
     res.status(200).json({ success: true, cart: user.cart });
   } catch (error) {
     console.error("addToCart error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -163,7 +163,7 @@ exports.updateCartQty = async (req, res) => {
     res.status(200).json({ success: true, cart: user.cart });
   } catch (error) {
     console.error("updateCartQty error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -180,7 +180,7 @@ exports.removeFromCart = async (req, res) => {
     res.status(200).json({ success: true, cart: user.cart });
   } catch (error) {
     console.error("removeFromCart error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -196,6 +196,6 @@ exports.clearCart = async (req, res) => {
     res.status(200).json({ success: true, cart: user.cart });
   } catch (error) {
     console.error("clearCart error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };

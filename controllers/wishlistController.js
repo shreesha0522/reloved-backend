@@ -12,7 +12,7 @@ exports.getWishlist = async (req, res) => {
     res.status(200).json({ success: true, wishlist: user.wishlist || [] });
   } catch (error) {
     console.error("getWishlist error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 // DELETE /api/wishlist/:id
@@ -40,7 +40,7 @@ exports.removeFromWishlist = async (req, res) => {
     res.status(200).json({ success: true, wishlist: user.wishlist });
   } catch (error) {
     console.error("removeFromWishlist error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -89,6 +89,6 @@ exports.toggleWishlistItem = async (req, res) => {
     res.status(200).json({ success: true, added, wishlist: user.wishlist });
   } catch (error) {
     console.error("toggleWishlistItem error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };

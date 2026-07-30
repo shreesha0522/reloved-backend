@@ -62,7 +62,7 @@ exports.register = async (req, res) => {
     });
   } catch (error) {
     console.error("Register error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -163,7 +163,7 @@ exports.login = async (req, res) => {
     });
   } catch (error) {
     console.error("Login error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -194,6 +194,6 @@ exports.getMe = async (req, res) => {
     });
   } catch (error) {
     console.error("getMe error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };

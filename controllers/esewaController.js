@@ -46,7 +46,7 @@ exports.initiateEsewaPayment = async (req, res) => {
     });
   } catch (error) {
     console.error("initiateEsewaPayment error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -115,6 +115,6 @@ exports.verifyEsewaPayment = async (req, res) => {
     res.status(200).json({ success: true, order });
   } catch (error) {
     console.error("verifyEsewaPayment error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };

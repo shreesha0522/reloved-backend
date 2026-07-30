@@ -46,7 +46,7 @@ exports.setupMFA = async (req, res) => {
     });
   } catch (error) {
     console.error("setupMFA error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -80,7 +80,7 @@ exports.verifySetupMFA = async (req, res) => {
     res.status(200).json({ success: true, message: "Two-factor authentication enabled." });
   } catch (error) {
     console.error("verifySetupMFA error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -142,7 +142,7 @@ exports.verifyLoginMFA = async (req, res) => {
     });
   } catch (error) {
     console.error("verifyLoginMFA error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -170,6 +170,6 @@ exports.disableMFA = async (req, res) => {
     res.status(200).json({ success: true, message: "Two-factor authentication disabled." });
   } catch (error) {
     console.error("disableMFA error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };

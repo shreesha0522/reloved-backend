@@ -7,7 +7,7 @@ exports.getAllPosts = async (req, res) => {
     res.status(200).json({ success: true, posts });
   } catch (error) {
     console.error("getAllPosts error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -21,7 +21,7 @@ exports.getPostById = async (req, res) => {
     res.status(200).json({ success: true, post });
   } catch (error) {
     console.error("getPostById error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -35,7 +35,7 @@ exports.getPostBySlug = async (req, res) => {
     res.status(200).json({ success: true, post });
   } catch (error) {
     console.error("getPostBySlug error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -56,7 +56,7 @@ exports.createPost = async (req, res) => {
     res.status(201).json({ success: true, post });
   } catch (error) {
     console.error("createPost error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -85,7 +85,7 @@ exports.updatePost = async (req, res) => {
     res.status(200).json({ success: true, post });
   } catch (error) {
     console.error("updatePost error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -99,6 +99,6 @@ exports.deletePost = async (req, res) => {
     res.status(200).json({ success: true, message: "Post deleted" });
   } catch (error) {
     console.error("deletePost error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };

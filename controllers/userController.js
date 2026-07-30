@@ -42,7 +42,7 @@ exports.getProfile = async (req, res) => {
     });
   } catch (error) {
     console.error("getProfile error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 // PUT /api/user/update
@@ -124,7 +124,7 @@ exports.updateProfile = async (req, res) => {
     });
   } catch (error) {
     console.error("updateProfile error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -163,7 +163,7 @@ exports.exportUserData = async (req, res) => {
     res.status(200).send(JSON.stringify(exportData, null, 2));
   } catch (error) {
     console.error("exportUserData error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -195,6 +195,6 @@ exports.requestSeller = async (req, res) => {
     });
   } catch (error) {
     console.error("requestSeller error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };

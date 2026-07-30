@@ -10,6 +10,6 @@ exports.getActivityLogs = async (req, res) => {
     res.status(200).json({ success: true, logs });
   } catch (error) {
     console.error("getActivityLogs error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };

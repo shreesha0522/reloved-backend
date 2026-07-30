@@ -43,7 +43,7 @@ exports.createOrder = async (req, res) => {
     res.status(201).json({ success: true, order });
   } catch (error) {
     console.error("createOrder error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -53,7 +53,7 @@ exports.getMyOrders = async (req, res) => {
     res.status(200).json({ success: true, orders });
   } catch (error) {
     console.error("getMyOrders error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -66,7 +66,7 @@ exports.getOrderById = async (req, res) => {
     res.status(200).json({ success: true, order });
   } catch (error) {
     console.error("getOrderById error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -93,7 +93,7 @@ exports.getSellerOrders = async (req, res) => {
     res.status(200).json({ success: true, orders: filtered });
   } catch (error) {
     console.error("getSellerOrders error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
 
@@ -133,6 +133,6 @@ exports.updateOrderStatus = async (req, res) => {
     res.status(200).json({ success: true, order });
   } catch (error) {
     console.error("updateOrderStatus error:", error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Something went wrong on the server." });
   }
 };
